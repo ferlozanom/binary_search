@@ -11,13 +11,112 @@ def find_smallest_positive(xs):
     but you're always searching for 0.
 
     >>> find_smallest_positive([-3, -2, -1, 0, 1, 2, 3])
-    4
+    4 (It should actually return 3)
     >>> find_smallest_positive([1, 2, 3])
     0
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
 
+    if len(xs) == 0:
+        return None
+
+    left = 0
+    right = len(xs)-1
+    
+    val = 0
+
+    def go(left,right):
+        mid = (left+right)//2
+        if val < xs[mid]:
+            if xs[mid-1] < val: #checking for negative
+                if left == mid:
+                    return mid
+                left = mid
+            else: 
+                right = mid-1
+        if val > xs[mid]:
+            left = mid+1
+        if val==xs[mid]:
+            index = mid + 1 #returning closest to 0 in sorted list 
+            return index
+        if left >= right:
+            if xs[mid] > val:
+                return mid
+            else:
+                if xs[mid-1] < val:
+                    return None
+                index = mid + 1 
+                return index
+        return go(left,right)
+    return go(left,right)
+
+
+def goofy(xs,x):
+
+    ''''
+    Recieves a list xs which contains integer x from count_repeats
+    Uses binary search to find the lowest index with a value >= x
+    '''
+
+    left = 0
+    right = len(xs)-1
+    
+    def go(left,right):
+        mid = (left+right)//2
+        if left >= right:
+            if len(xs) == 0:
+                return 0
+            if x == xs[mid]:
+                return mid
+            else:
+                return 0
+        if x > xs[mid]:
+            right = mid-1
+        if x < xs[mid]:
+            left = mid+1
+        if x == xs[mid]:
+            if xs[mid-1] == x:
+                right = mid
+            else:
+                return mid
+        return go(left,right)
+    return go(left,right)
+
+def dominant(xs,x):
+    
+    ''''
+    Recieves a list xs which contains integer x from count_repeats
+    Uses binary search to find the lowest index with a value < x
+    '''
+    left = 0
+    right = len(xs)-1
+    
+    def go(left,right):
+        mid = (left+right)//2
+        if left >= right:
+            if len(xs) == 0:
+                return 0
+            if x == xs[mid]:
+                return mid + 1
+            else:
+                return 0
+        if x > xs[mid]:
+            right = mid-1
+        if x < xs[mid]:
+            left = mid+1
+        if x == xs[mid]:
+            if xs[mid+1] == x:
+                if mid == len(xs) - 2: 
+                    return mid + 2
+                elif xs[mid+2] < x:
+                    return mid + 2
+                else: 
+                    left = mid
+            else:
+                return mid + 1
+        return go(left,right)
+    return go(left,right)
 
 def count_repeats(xs, x):
     '''
@@ -27,8 +126,8 @@ def count_repeats(xs, x):
 
     HINT: 
     Use the following three step procedure:
-        1) use binary search to find the lowest index with a value >= x
-        2) use binary search to find the lowest index with a value < x
+        1) use goofy function, which uses binary search to find the lowest index with a value >= x
+        2) use dominant function, which uses binary search to find the lowest index with a value < x
         3) return the difference between step 1 and 2
 
     I highly recommend creating stand-alone functions for steps 1 and 2
@@ -39,7 +138,12 @@ def count_repeats(xs, x):
     >>> count_repeats([1, 2, 3], 4)
     0
     '''
-
+    smallest = goofy(xs,x)
+    biggest = dominant(xs,x)
+    
+    difference = biggest - smallest
+    
+    return difference
 
 def argmin(f, lo, hi, epsilon=1e-3):
     '''
@@ -62,3 +166,18 @@ def argmin(f, lo, hi, epsilon=1e-3):
     -0.00016935087808430278
     '''
 
+    def go(lo,hi):
+        m1 = lo + (hi-lo)/3
+        m2 = lo + ((hi-lo)/3)*2
+        print('lo=',lo,'hi=',hi,'m2=',m2,'m1=',m1)
+        if abs(lo-hi) < epsilon:
+            return (hi+lo)/2
+        if f(m2) < f(m1):
+            lo = m1
+        if f(m2) > f(m1):
+            hi = m2
+        if f(m2) == f(m1):
+            lo = m1
+            hi = m2
+        return go(lo,hi)
+    return go(lo,hi)
